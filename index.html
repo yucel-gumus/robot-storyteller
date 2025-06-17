@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Hikayecisi - Açıklama Aracı</title>
+  <meta name="description" content="Karmaşık konuları eğlenceli robot hikayeleriyle açıklayan AI destekli araç">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+  <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^0.7.0",
+        "marked": "https://esm.sh/marked@^15.0.7"
+      }
+    }
+  </script>
+
+  <div class="container">
+    <!-- Header Section -->
+    <header class="header">
+      <div class="hero">
+        <div class="hero-icon">🤖</div>
+        <h1 class="hero-title">Robot Hikayecisi</h1>
+        <p class="hero-subtitle">Karmaşık konuları eğlenceli robot hikayeleriyle açıklıyoruz</p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Examples Section -->
+      <section class="examples-section">
+        <h2 class="section-title">
+          <span class="section-icon">💡</span>
+          Örnek Konular
+        </h2>
+        <div class="examples-grid" id="examples">
+          <button class="example-card" type="button">
+            <span class="example-icon">🧠</span>
+            <span class="example-text">Sinir ağları nasıl çalışır?</span>
+          </button>
+          <button class="example-card" type="button">
+            <span class="example-icon">🎬</span>
+            <span class="example-text">Model Context Protocol (MCP) nedir nasıl çalışır?</span>
+          </button>
+          <button class="example-card" type="button">
+            <span class="example-icon">🌌</span>
+            <span class="example-text">Modem nedir nasıl çalışır?</span>
+          </button>
+          <button class="example-card" type="button">
+            <span class="example-icon">⚛️</span>
+            <span class="example-text">Kuantum fiziği nedir?</span>
+          </button>
+          <button class="example-card" type="button">
+            <span class="example-icon">🔐</span>
+            <span class="example-text">Blockchain nasıl çalışır?</span>
+          </button>
+          <button class="example-card" type="button">
+            <span class="example-icon">🧬</span>
+            <span class="example-text">DNA replikasyonu nasıl çalışır?</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Input Section -->
+      <section class="input-section">
+        <h2 class="section-title">
+          <span class="section-icon">✍️</span>
+          Kendi Sorunuzu Sorun
+        </h2>
+        <div class="input-container">
+          <label for="input" class="input-label">Açıklamak istediğiniz konuyu yazın:</label>
+          <div class="textarea-wrapper">
+            <textarea 
+              id="input" 
+              placeholder="Örn: Yapay zeka nasıl öğrenir? (Enter'a basarak gönderebilirsiniz)"
+              aria-describedby="input-help"
+              rows="3"
+            ></textarea>
+            <button id="send-button" class="send-button" type="button" aria-label="Mesajı gönder">
+              <span class="send-icon">📤</span>
+            </button>
+          </div>
+          <p id="input-help" class="input-help">
+            💡 İpucu: Spesifik sorular daha iyi sonuçlar verir
+          </p>
+        </div>
+      </section>
+
+      <!-- Output Section -->
+      <section class="output-section">
+        <div id="output" class="output-content"></div>
+        <div id="error" class="error-message" hidden role="alert" aria-live="polite"></div>
+      </section>
+
+      <!-- Slideshow Section -->
+      <section class="slideshow-section">
+        <div id="slideshow" class="slideshow" hidden>
+          <div class="slideshow-header">
+            <h2 class="slideshow-title">
+              <span class="slideshow-icon">📖</span>
+              Robot Hikayesi
+            </h2>
+            <div class="slideshow-controls">
+              <button id="prev-slide" class="slide-nav-button" type="button" aria-label="Önceki slayt">
+                <span>←</span>
+              </button>
+              <span id="slide-counter" class="slide-counter">1 / 1</span>
+              <button id="next-slide" class="slide-nav-button" type="button" aria-label="Sonraki slayt">
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+          <div id="slides-container" class="slides-container">
+            <!-- Slides will be added here dynamically -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>🤖 Robot Hikayecisi ile öğrenmeyi eğlenceli hale getirin!</p>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" hidden>
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Robotlar hikayenizi hazırlıyor...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
