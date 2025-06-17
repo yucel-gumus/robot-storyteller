@@ -50,17 +50,12 @@ if (!userInput || !modelOutput || !slideshow || !slidesContainer || !errorElemen
 
 // Initialize AI
 const apiKey = process.env.GEMINI_API_KEY;
-console.log('🔑 API Key status:', apiKey ? 'Present ✅' : 'Missing ❌');
-console.log('🔑 API Key length:', apiKey?.length || 0);
-
 if (!apiKey) {
   throw new Error('GEMINI_API_KEY environment variable is required');
 }
 
-console.log('🤖 Initializing Google AI...');
 const ai = new GoogleGenAI({ apiKey });
 
-console.log('💬 Creating chat instance...');
 const chat = ai.chats.create({
   model: MODEL_NAME,
   config: {
@@ -68,8 +63,6 @@ const chat = ai.chats.create({
   },
   history: [],
 });
-
-console.log('✅ AI initialization complete');
 
 // State management
 let currentSlideIndex = 0;
@@ -80,13 +73,9 @@ let slides: HTMLDivElement[] = [];
  * Hides loading overlay
  */
 function hideLoading(): void {
-  console.log('🔄 Attempting to hide loading overlay');
   if (loadingOverlay) {
     loadingOverlay.style.display = 'none';
     loadingOverlay.setAttribute('hidden', 'true');
-    console.log('✅ Loading overlay hidden');
-  } else {
-    console.error('❌ Loading overlay element not found');
   }
 }
 
@@ -94,13 +83,9 @@ function hideLoading(): void {
  * Shows loading overlay
  */
 function showLoading(): void {
-  console.log('🔄 Showing loading overlay');
   if (loadingOverlay) {
     loadingOverlay.style.display = 'flex';
     loadingOverlay.removeAttribute('hidden');
-    console.log('✅ Loading overlay shown');
-  } else {
-    console.error('❌ Loading overlay element not found');
   }
 }
 
@@ -242,7 +227,6 @@ function cleanResponseText(text: string): string {
     return '';
   }
   
-  console.log('🧹 Cleaned text:', cleanText.substring(0, 100) + (cleanText.length > 100 ? '...' : ''));
   return cleanText;
 }
 
@@ -303,49 +287,38 @@ async function generate(message: string): Promise<void> {
     return;
   }
 
-  console.log('🚀 Generation started for:', trimmedMessage);
   setInputsDisabled(true);
   showLoading();
   clearUI();
 
   // Timeout mechanism
   const timeoutId = setTimeout(() => {
-    console.error('⏰ Request timeout after 60 seconds');
     hideLoading();
     setInputsDisabled(false);
     showError('İstek zaman aşımına uğradı. Lütfen tekrar deneyin.');
-  }, 60000); // Increased to 60 seconds
+  }, 60000);
 
   try {
     // Add user message to output
     const userMessage = await createUserMessage(trimmedMessage);
     modelOutput!.append(userMessage);
     userInput!.value = '';
-
-    console.log('📤 Sending message to AI...');
-    console.log('📝 Full prompt:', trimmedMessage + ADDITIONAL_INSTRUCTIONS);
     
     // Try streaming first
     try {
       const result = await chat.sendMessageStream({
         message: trimmedMessage + ADDITIONAL_INSTRUCTIONS,
       });
-
-      console.log('📥 Stream started, processing chunks...');
       
       let accumulatedText = '';
       let currentImage: HTMLImageElement | null = null;
       let chunkCount = 0;
-      let lastChunkTime = Date.now();
 
       for await (const chunk of result) {
         chunkCount++;
-        lastChunkTime = Date.now();
-        console.log(`📦 Processing chunk ${chunkCount}:`, chunk);
         
         // Check if chunk has the expected structure
         if (!chunk || !chunk.candidates) {
-          console.warn('⚠️ Chunk missing candidates:', chunk);
           continue;
         }
         
@@ -353,17 +326,14 @@ async function generate(message: string): Promise<void> {
         
         if (text) {
           accumulatedText += text;
-          console.log('📝 Text accumulated:', text.substring(0, 50) + '...');
         }
         
         if (image) {
           currentImage = image;
-          console.log('🖼️ Image received');
         }
 
         // If we have both text and image, create a slide
         if (accumulatedText && currentImage) {
-          console.log('🎪 Creating slide with text and image');
           await addSlide({ text: accumulatedText, image: currentImage });
           slideshow!.removeAttribute('hidden');
           accumulatedText = '';
@@ -371,30 +341,22 @@ async function generate(message: string): Promise<void> {
         }
       }
 
-      console.log(`✅ Stream completed. Total chunks: ${chunkCount}`);
-
       // Handle remaining content
       if (currentImage && accumulatedText) {
-        console.log('🎪 Creating final slide');
         await addSlide({ text: accumulatedText, image: currentImage });
         slideshow!.removeAttribute('hidden');
       }
 
       // Check if we got any content
       if (chunkCount === 0) {
-        console.warn('⚠️ No chunks received from stream, trying non-stream approach...');
         throw new Error('No chunks received');
       }
 
     } catch (streamError) {
-      console.warn('⚠️ Streaming failed, trying regular sendMessage:', streamError);
-      
       // Fallback to non-streaming
       const result = await chat.sendMessage({
         message: trimmedMessage + ADDITIONAL_INSTRUCTIONS,
       });
-
-      console.log('📥 Non-stream response received:', result);
       
       if (result.candidates && result.candidates.length > 0) {
         const candidate = result.candidates[0];
@@ -407,13 +369,11 @@ async function generate(message: string): Promise<void> {
               const cleanedText = cleanResponseText(part.text);
               if (cleanedText) {
                 accumulatedText += cleanedText;
-                console.log('📝 Text from non-stream:', cleanedText.substring(0, 50) + '...');
               }
             } else if (part.inlineData?.data) {
               currentImage = document.createElement('img');
               currentImage.src = `data:image/png;base64,${part.inlineData.data}`;
               currentImage.alt = 'Robot hikayesi illüstrasyonu';
-              console.log('🖼️ Image from non-stream');
             }
           }
           
@@ -430,19 +390,16 @@ async function generate(message: string): Promise<void> {
 
     // Auto-scroll to first slide
     if (totalSlides > 0) {
-      console.log(`🎯 Auto-scrolling to first slide. Total slides: ${totalSlides}`);
       setTimeout(() => goToSlide(0), 500);
     } else {
-      console.warn('⚠️ No slides were created');
       showError('Hiçbir slayt oluşturulamadı. Lütfen farklı bir soru deneyin.');
     }
 
   } catch (error) {
-    console.error('❌ Error during generation:', error);
+    console.error('Generation error:', error);
     const errorMessage = parseError(error);
     showError(errorMessage);
   } finally {
-    console.log('🏁 Generation finished');
     clearTimeout(timeoutId);
     hideLoading();
     setInputsDisabled(false);
@@ -544,15 +501,11 @@ function initializeEventListeners(): void {
   document.addEventListener('keydown', handleSlideKeyboard);
 
   // Force hide loading on initialization
-  console.log('🔧 Force hiding loading overlay');
   hideLoading();
-  
-  // Also ensure inputs are enabled
   setInputsDisabled(false);
 }
 
 // Initialize the application
-console.log('🚀 Initializing application...');
 initializeEventListeners();
 
 // Focus input on load
@@ -560,7 +513,6 @@ userInput!.focus();
 
 // Emergency loading fix - force hide after a short delay
 setTimeout(() => {
-  console.log('🆘 Emergency loading hide');
   hideLoading();
   setInputsDisabled(false);
 }, 1000);
