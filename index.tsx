@@ -8,14 +8,24 @@ import { marked } from 'marked';
 
 // Constants
 const ADDITIONAL_INSTRUCTIONS = `
-Use a fun story about lots of robots as a metaphor.
-Keep sentences short but conversational, casual, and engaging.
-Generate a cute, minimal illustration for each sentence with black ink on white background.
-No commentary, just begin your explanation.
-Keep going until you're done.
-Tüm anlatım Türkçe olacak, başka dil kullanılmayacak.
-Açıklama tamamlanana kadar kesintisiz devam et.
-Bu açıklama, mizah anlayışı olan meraklı gençlere ve yetişkinlere yönelik.`;
+Robot hikayeleri kullanarak açıkla. Her cümle için konuyla doğrudan ilgili, detaylı ve kaliteli bir illüstrasyon oluştur.
+
+İllüstrasyon gereksinimleri:
+- Konunun ana temasını görsel olarak tam yansıtsın
+- Basit, minimal çizgiler (siyah mürekkep, beyaz arka plan)
+- Robotlar hikayedeki rollerini net şekilde göstersin  
+- Teknik detayları görsel metaforlarla açıklasın
+- Her slayt için farklı perspektif ve kompozisyon kullan
+- Konunun karmaşıklığına uygun detay seviyesi
+
+Metin gereksinimleri:
+- Türkçe anlatım, kısa ama etkili cümleler
+- Konuyla alakalı robot karakterleri ve senaryoları
+- Her slayt bağımsız anlaşılabilir olsun
+- Mizahi ama bilgilendirici ton
+- Teknik kavramları günlük hayattan örneklerle açıkla
+
+Direkt açıklamaya başla, yorumsuz.`;
 
 const MODEL_NAME = 'gemini-2.0-flash-preview-image-generation';
 
