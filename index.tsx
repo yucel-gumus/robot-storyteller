@@ -8,24 +8,27 @@ import { marked } from 'marked';
 
 // Constants
 const ADDITIONAL_INSTRUCTIONS = `
-Robot hikayeleri kullanarak açıkla. Her cümle için konuyla doğrudan ilgili, detaylı ve kaliteli bir illüstrasyon oluştur.
+ZORUNLU: Bu konuyu tam 10-12 farklı slayta böl. Her slayt için ayrı metin + ayrı illüstrasyon üret. 
+
+Robot hikayeleri kullanarak açıkla. Konuyu adım adım parçalara böl ve her parça için:
+1) Kısa Türkçe açıklama metni (2-3 cümle)
+2) O bölümle ilgili özel illüstrasyon
 
 İllüstrasyon gereksinimleri:
-- Konunun ana temasını görsel olarak tam yansıtsın
+- Her slayt için tamamen farklı görsel 
 - Basit, minimal çizgiler (siyah mürekkep, beyaz arka plan)
 - Robotlar hikayedeki rollerini net şekilde göstersin  
-- Teknik detayları görsel metaforlarla açıklasın
-- Her slayt için farklı perspektif ve kompozisyon kullan
-- Konunun karmaşıklığına uygun detay seviyesi
+- Her slayt farklı sahne/perspektif
+- Slayt numarasına uygun içerik derinliği
 
 Metin gereksinimleri:
-- Türkçe anlatım, kısa ama etkili cümleler
-- Konuyla alakalı robot karakterleri ve senaryoları
-- Her slayt bağımsız anlaşılabilir olsun
-- Mizahi ama bilgilendirici ton
-- Teknik kavramları günlük hayattan örneklerle açıkla
+- Her slayt için ayrı kısa paragraph
+- Robot karakterleri ve senaryoları
+- Her slayt bağımsız anlaşılabilir
+- Konuyu sıralı şekilde açıkla
+- Teknik kavramları basit örneklerle
 
-Direkt açıklamaya başla, yorumsuz.`;
+MUTLAKA 10+ slayt üret. Her slayt: [METIN] + [İLLÜSTRASYON]`;
 
 const MODEL_NAME = 'gemini-2.0-flash-preview-image-generation';
 
@@ -65,14 +68,6 @@ if (!apiKey) {
 }
 
 const ai = new GoogleGenAI({ apiKey });
-
-const chat = ai.chats.create({
-  model: MODEL_NAME,
-  config: {
-    responseModalities: [Modality.TEXT, Modality.IMAGE],
-  },
-  history: [],
-});
 
 // State management
 let currentSlideIndex = 0;
@@ -169,6 +164,19 @@ function parseError(error: unknown): string {
   } catch {
     return error;
   }
+}
+
+/**
+ * Creates a fresh chat instance
+ */
+function createFreshChat() {
+  return ai.chats.create({
+    model: MODEL_NAME,
+    config: {
+      responseModalities: [Modality.TEXT, Modality.IMAGE],
+    },
+    history: [],
+  });
 }
 
 /**
@@ -309,6 +317,9 @@ async function generate(message: string): Promise<void> {
   }, 60000);
 
   try {
+    // Create fresh chat instance for each new story
+    const chat = createFreshChat();
+    
     // Add user message to output
     const userMessage = await createUserMessage(trimmedMessage);
     modelOutput!.append(userMessage);
@@ -373,6 +384,7 @@ async function generate(message: string): Promise<void> {
         if (candidate.content && candidate.content.parts) {
           let accumulatedText = '';
           let currentImage: HTMLImageElement | null = null;
+          let slideCount = 0;
           
           for (const part of candidate.content.parts) {
             if (part.text) {
@@ -381,18 +393,25 @@ async function generate(message: string): Promise<void> {
                 accumulatedText += cleanedText;
               }
             } else if (part.inlineData?.data) {
+              // If we had accumulated text and now get an image, create a slide
+              if (accumulatedText && currentImage) {
+                await addSlide({ text: accumulatedText, image: currentImage });
+                slideshow!.removeAttribute('hidden');
+                accumulatedText = '';
+                slideCount++;
+              }
+              
               currentImage = document.createElement('img');
               currentImage.src = `data:image/png;base64,${part.inlineData.data}`;
               currentImage.alt = 'Robot hikayesi illüstrasyonu';
             }
           }
           
-          if (accumulatedText || currentImage) {
-            await addSlide({ 
-              text: accumulatedText || 'Robot hikayesi...', 
-              image: currentImage || new Image()
-            });
+          // Handle final slide
+          if (accumulatedText && currentImage) {
+            await addSlide({ text: accumulatedText, image: currentImage });
             slideshow!.removeAttribute('hidden');
+            slideCount++;
           }
         }
       }
